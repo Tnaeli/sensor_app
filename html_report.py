@@ -177,17 +177,6 @@ def createReport(data_Aqt, savePath, template_folder, template_name, station_id=
                 '20_pm10': 'Blominmaki'}
     pm10.rename(columns=data_columns, inplace = True)
     pm10_div = plotly.offline.plot(plotlyplot_bar(pm10), show_link=False, output_type='div')
-    
-    legend_sensor = '''<svg width="100" height="25">
-                      <circle cx="10" cy="10" r="6"
-                      stroke="#3bb3d1" stroke-width="2" fill="white" fill_opacity=0.1 />
-                      <text fill="#000000" font-size="12" x="22" y="58%%">%s</text>
-                    </svg>'''% 'Sensori'
-    legend_station = '''<svg width="100" height="25">
-                      <rect x="1" y="2" rx="2" ry="2" width="16" height="16"
-                      stroke="#3bb3d1" stroke-width="3" fill="white" fill-opacity=0.5 />
-                     <text fill="#000000" font-size="12" x="22" y="55%%">%s</text>
-                 </svg>'''% 'Mittausasema'
                  
                  
     if online:
