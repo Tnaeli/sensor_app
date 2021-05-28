@@ -1,4 +1,6 @@
 	Ini file names
+report_template_folder	C:\path\to\folder
+report_template	template_name.html
 report_online	C:\path\to\sensor_report.html
 report_offline	C:\path\to\sensor_report_intended_for_offline.html
 mapSavepath	C:\path\to\sensorikartta.html

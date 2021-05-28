@@ -131,7 +131,7 @@ def loadTemplate(path, template):
     
     
 
-def createReport(data_Aqt, savePath, station_id=None, online=True, kartta='sensorikartta.html'):
+def createReport(data_Aqt, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html'):
     components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25', 'rh', 'temp']
     
     station_data = parse_station_data()
@@ -192,107 +192,11 @@ def createReport(data_Aqt, savePath, station_id=None, online=True, kartta='senso
                  
     if online:
         aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
-        template = loadTemplate(r"C:\Koodit\hsysensor", "template3.html")
+        template = loadTemplate(template_folder, template_name)
         outputText = template.render(aika=aika, divs = divs, divs_D = divs_D, pm10_div=pm10_div, kartta=kartta)
     if not online:
-        template = loadTemplate(r"C:\Koodit\hsysensor", "template3.html")
+        template = loadTemplate(template_folder, template_name)
         outputText = template.render(divs = divs, divs_D = divs_D, pm10_div=pm10_div)
         
-        
-    # if online:
-    #     html_string = '''
-    #     <html>
-    #         <head>
-    #             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    #             <style>body{ margin:0 100; background:whitesmoke; }</style>
-    #         </head>
-    #         <header>
-    #             <h1>Sensorikartta</h1>
-    #         </header>
-    #         <body>
-    #             <div>
-    #             <iframe src="sensorikartta.html" width="1000" height="700" title="Kartta"></iframe>
-    #             </div>
-    #             <div>
-    #             ''' + legend_sensor + legend_station + '''
-    #             </div>
-    #             <h1>Mittaustulokset</h1>
-    #                 <!-- *** Section 1 *** --->
-    #                 <h2>PM10</h2>
-    #                 ''' + divs['pm10'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <h2>RH</h2>
-    #                 ''' + divs['rh'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 ''' + divs_D['pm10'] + '''
-    #                 <p>Vuorokausikeskiarvot viimeiset 4 vuorokautta sekä kuluvan vuorokauden keskiarvo</p>
-    #                 ''' + pm10_div + '''
-    #                 <p>Vuorokausikeskiarvot viimeiseltä 2 vuorokautta sekä kuluvan vuorokauden keskiarvo</p>
-    #                 <!-- *** Section 2 *** --->
-    #                 <h2>PM2.5</h2>
-    #                 ''' + divs['pm25'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 3 *** --->
-    #                 <h2>NO2</h2>
-    #                 ''' + divs['no2'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-                    
-    #                 <h2></h2>
-                    
-    #         </body>
-    #     </html>'''
-        
-        
-    
-    # if not online:
-    #     html_string = '''
-    #     <html>
-    #         <head>
-    #             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    #             <style>body{ margin:0 100; background:whitesmoke; }</style>
-    #         </head>
-    #         <header>
-    #             <h1>Sensorikartta</h1>
-    #         </header>
-    #         <body>
-    #             <div>
-    #             <iframe src="sensorikartta.html" width="1000" height="700" title="Kartta"></iframe>
-    #             </div>
-    #             <h1>Mittaustulokset</h1>
-    #                 <!-- *** Section 1 *** --->
-    #                 <h2>PM10</h2>
-    #                 ''' + divs['pm10'] + '''
-    #                <!-- *** Section 1 *** --->
-    #                 <h2>RH</h2>
-    #                 ''' + divs['rh'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 2 *** --->
-    #                 <h2>PM2.5</h2>
-    #                 ''' + divs['pm25'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 3 *** --->
-    #                 <h2>NO2</h2>
-    #                 ''' + divs['no2'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 4 *** --->
-    #                 <h2>NO</h2>
-    #                 ''' + divs['no'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 5 *** --->
-    #                 <h2>CO</h2>
-    #                 ''' + divs['co'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <!-- *** Section 6 *** --->
-    #                 <h2>O3</h2>
-    #                 ''' + divs['o3'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-    #                 <h2>Temp</h2>
-    #                 ''' + divs['temp'] + '''
-    #                 <p>Tuntikeskiarvot</p>
-
-    #         </body>
-    #     </html>'''
-    
-    
     with open(savePath, 'w') as report:
         report.write(outputText)
