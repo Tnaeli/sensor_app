@@ -187,5 +187,5 @@ def createReport(data_Aqt, savePath, template_folder, template_name, station_id=
         template = loadTemplate(template_folder, template_name)
         outputText = template.render(divs = divs, divs_D = divs_D, pm10_div=pm10_div)
         
-    with open(savePath, 'w') as report:
+    with open(savePath, 'w', encoding='utf-8') as report:
         report.write(outputText)
