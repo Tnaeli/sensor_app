@@ -122,6 +122,19 @@ def parse_station_data():
     data[data==-9999] = np.nan
     return data
 
+def create_station_graph_div(station_data, component):
+    data = station_data.filter(like='component').shift(periods=-1, freq='H')
+    data = data.resample('D', label='left').mean().iloc[1:, :].round(1)
+    data = data.dropna(how='all', axis=1)
+    data_columns = {'1_pm10': 'Leppavaara','3_pm10':'PM_Tikkurila' ,'4_pm10':'Mannerheimintie' ,'5_pm10': 'Kallio','6_pm10': 'Vartiokyla',
+                '7_pm10': 'Luukki','8_pm10': 'Tikkurila','9_pm10': 'Lohja','10_pm10': 'Toolontulli','11_pm10': 'Matinkyla',
+                '12_pm10': 'Ruskeasanta','13_pm10': 'Katajanokka','14_pm10': 'Hyvinkaa','17_pm10': 'Ammassuo 2','18_pm10': 'Makelankatu',
+                '20_pm10': 'Blominmaki'}
+    data.rename(columns=data_columns, inplace = True)
+    data_div = plotly.offline.plot(plotlyplot_bar(data), show_link=False, output_type='div')
+    return data_div
+    
+
 def loadTemplate(path, template):
     templateLoader = jinja2.FileSystemLoader(searchpath=path)
     templateEnv = jinja2.Environment(loader=templateLoader)
@@ -135,6 +148,7 @@ def createReport(data_Aqt, savePath, template_folder, template_name, station_id=
     components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25', 'rh', 'temp']
     
     station_data = parse_station_data()
+    pm10_div = create_station_graph_div(station_data, 'pm10')
     
     
     data_dict = {}
@@ -168,24 +182,13 @@ def createReport(data_Aqt, savePath, template_folder, template_name, station_id=
     for component, fig in figs_D.items():
         divs_D[component] = plotly.offline.plot(fig, show_link=False, output_type='div')
     
-    pm10 = station_data.filter(like='pm10').shift(periods=-1, freq='H')
-    pm10 = pm10.resample('D', label='left').mean().iloc[1:, :].round(1)
-    pm10 = pm10.dropna(how='all', axis=1)
-    data_columns = {'1_pm10': 'Leppavaara','3_pm10':'PM_Tikkurila' ,'4_pm10':'Mannerheimintie' ,'5_pm10': 'Kallio','6_pm10': 'Vartiokyla',
-                '7_pm10': 'Luukki','8_pm10': 'Tikkurila','9_pm10': 'Lohja','10_pm10': 'Toolontulli','11_pm10': 'Matinkyla',
-                '12_pm10': 'Ruskeasanta','13_pm10': 'Katajanokka','14_pm10': 'Hyvinkaa','17_pm10': 'Ammassuo 2','18_pm10': 'Makelankatu',
-                '20_pm10': 'Blominmaki'}
-    pm10.rename(columns=data_columns, inplace = True)
-    pm10_div = plotly.offline.plot(plotlyplot_bar(pm10), show_link=False, output_type='div')
+
                  
-                 
-    if online:
-        aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
-        template = loadTemplate(template_folder, template_name)
-        outputText = template.render(aika=aika, divs = divs, divs_D = divs_D, pm10_div=pm10_div, kartta=kartta)
-    if not online:
-        template = loadTemplate(template_folder, template_name)
-        outputText = template.render(divs = divs, divs_D = divs_D, pm10_div=pm10_div)
+
+    aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
+    template = loadTemplate(template_folder, template_name)
+    outputText = template.render(aika=aika, divs = divs, divs_D = divs_D, pm10_div=pm10_div, kartta=kartta)
+
         
     with open(savePath, 'w', encoding='utf-8') as report:
         report.write(outputText)
