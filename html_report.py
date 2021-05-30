@@ -59,7 +59,23 @@ def plotlyplot_bar(df1):
         line=dict(color="black", width=4, dash="dashdot"))
     return fig
 
+def plotlyplot_scatter(df1, x):
+    color_map = ['#379f9b', '#f18931', '#006431', '#bd3429',
+                 '#814494', '#d82e8a', '#74aa50', '#006aa7']
 
+    df1 = df1.melt(ignore_index=False, var_name='variable', value_name='value', id_vars=[x])
+
+    fig = px.scatter(df1, x=x, y='value', facet_col='variable', color_discrete_sequence=color_map,
+                    width=1000, height=350)
+
+    fig.update_layout(legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.4,
+        xanchor="right",
+        x=0.95
+        ))
+    return fig
 
 
 def createTable(df):
@@ -123,7 +139,7 @@ def parse_station_data():
     return data
 
 def create_station_graph_div(station_data, component):
-    data = station_data.filter(like='component').shift(periods=-1, freq='H')
+    data = station_data.filter(like=component).shift(periods=-1, freq='H')
     data = data.resample('D', label='left').mean().iloc[1:, :].round(1)
     data = data.dropna(how='all', axis=1)
     data_columns = {'1_pm10': 'Leppavaara','3_pm10':'PM_Tikkurila' ,'4_pm10':'Mannerheimintie' ,'5_pm10': 'Kallio','6_pm10': 'Vartiokyla',
@@ -141,7 +157,7 @@ def loadTemplate(path, template):
     TEMPLATE_FILE = template
     template = templateEnv.get_template(TEMPLATE_FILE)
     return template
-    
+
     
 
 def createReport(data_Aqt, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html'):
@@ -188,6 +204,48 @@ def createReport(data_Aqt, savePath, template_folder, template_name, station_id=
     aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
     template = loadTemplate(template_folder, template_name)
     outputText = template.render(aika=aika, divs = divs, divs_D = divs_D, pm10_div=pm10_div, kartta=kartta)
+
+        
+    with open(savePath, 'w', encoding='utf-8') as report:
+        report.write(outputText)
+
+
+def create_colocation_report(data_Aqt, savePath, template_folder, template_name, station_id=None, kartta='sensorikartta.html'):
+    components = ['no2', 'no', 'o3', 'pm10', 'pm25']
+    
+    station_data = parse_station_data()
+    
+    data_dict = {}
+    for component in components:
+        data = data_Aqt[[component, 'sensor_id']]
+        data = pd.pivot_table(data, values=component,
+                              index=data.index, columns='sensor_id')
+        data = data.resample('H', label='right').mean().round(1)
+        if station_id != None:
+            if component in ['no', 'no2', 'pm10', 'pm25', 'o3']:
+                refData = station_data.filter(like=f'{station_id}_')
+                data = pd.concat([data, refData.loc[:, f'{station_id}_{component}'].rename('Makelankatu')],axis=1)
+        data_dict[component] = data
+    
+    figs = {}
+    figs_scatter = {}
+    for component, data in data_dict.items():
+        figs[component] = plotlyplot_line(data)
+
+    for component, data in data_dict.items():
+        figs_scatter[component] = plotlyplot_scatter(data, 'Makelankatu')
+        
+    divs = {}
+    divs_scatter = {}
+    for component, fig in figs.items():
+        divs[component] = plotly.offline.plot(fig, show_link=False, output_type='div')      
+
+    for component, fig in figs_scatter.items():
+        divs_scatter[component] = plotly.offline.plot(fig, show_link=False, output_type='div')     
+        
+    aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
+    template = loadTemplate(template_folder, template_name)
+    outputText = template.render(aika=aika, divs = divs, divs_scatter = divs_scatter, kartta=kartta)
 
         
     with open(savePath, 'w', encoding='utf-8') as report:

@@ -12,7 +12,7 @@ import airqualitymap
 import html_report
 
 
-def query_data_for_report(session, days):
+def query_data_for_report(session, days, legend):
     date1 = (pd.Timestamp(datetime.datetime.now() - 
                           datetime.timedelta(days=days, 
                             hours=datetime.datetime.now().hour,
@@ -24,7 +24,7 @@ def query_data_for_report(session, days):
     
     sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('id')
     
-    data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2)
+    data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2, legend=legend)
     if data_all.empty:
         dataframe_empty = True
     else:
@@ -55,7 +55,7 @@ def generate_map(session, data_all, hours, ini, m):
 def Main():
     # Create connector for database based on ini-file
     # -------------------------------------------------------------------------
-    ini_file = r"C:\Koodit\sensor_app\IniFile.csv"
+    ini_file = r"C:\Users\Taneli\Documents\sensor_app\sensor_app\IniFile.csv"
     ini = pd.read_csv(ini_file, sep= '\t', index_col=0)
     session = dbqueries.createSession(ini)
     
@@ -67,11 +67,13 @@ def Main():
     # -------------------------------------------------------------------------
     
     days = 4 # Number of days from current time for report
-    data_all, dataframe_empty = query_data_for_report(session, days)
+    data_all, dataframe_empty = query_data_for_report(session, days, 'sensor')
     if dataframe_empty:
         print('No data found between given date range')
     else:
+        data_colocation = data_all[data_all.sensor_id.isin(['HSYS001', 'HSYS002', 'HSYS004'])].copy()
         data_all = data_all[data_all.sensor_id != 'Supersite']
+
         
         
         # Generate map and save to file
@@ -83,8 +85,9 @@ def Main():
     
         # Generate HTML report and save to file
         # ---------------------------------------------------------------------
-        html_report.createReport(data_all, ini.loc["report_online"][0], ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True)
+        # html_report.createReport(data_all, ini.loc["report_online"][0], ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True)
         # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
+        html_report.create_colocation_report(data_colocation, r"C:\Users\Taneli\Documents\sensor_app\colocrap.html", ini.loc["report_template_folder"][0], 'template_colocation_report.html', 18)
         
         
 Main()

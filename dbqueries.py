@@ -211,7 +211,7 @@ def applyCorrection(sensors, data, components):
     
 
 
-def queryBetweenDates(session, sensors, locations, date1, date2):
+def queryBetweenDates(session, sensors, locations, date1, date2, legend='location'):
 
     data = pd.read_sql(session.query(Aqt).filter(
         Aqt.timestamp.between(date1, date2)
@@ -223,7 +223,10 @@ def queryBetweenDates(session, sensors, locations, date1, date2):
     for  idx, row in sensors.iterrows():
         sensors.loc[idx, 'loc_id'] = locations.loc[row['loc_id'], 'name']
 
-    legends = dict(zip(sensors.index.tolist(), sensors.loc_id.tolist()))
+    if legend == 'location':
+        legends = dict(zip(sensors.index.tolist(), sensors.loc_id.tolist()))
+    if legend == 'sensor':
+        legends = dict(zip(sensors.index.tolist(), sensors.name.tolist()))
     data['sensor_id'] = data['sensor_id'].replace(legends)
 
     data.index = data['timestamp']
