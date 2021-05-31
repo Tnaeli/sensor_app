@@ -120,8 +120,15 @@
   <div class="tab-content">
     <div id="home" class="container tab-pane active"><br>
       <h2>Hengittettävät hiukkaset PM10</h2>
+          <h3>PM10 tuntikeskiarvot</h3>
             {{ divs['pm10'] }}
+            <br>
+            <h3>PM10 sensorien vuorokausikeskiarvot</h3>
+            <p>(Huom! vuorokausikeskiarvo lasketaan aina vaikka 75 % datamäärä ei täyttyisi)</p>
             {{ divs_D['pm10'] }}
+            <br>
+            <h3>PM10 asemien vuorokausikeskiarvo</h3>
+            <p>(Huom! vuorokausikeskiarvo lasketaan aina vaikka 75 % datamäärä ei täyttyisi, tarkista ylitykset Envistasta)</p>
             {{ pm10_div }}
       <h2>Suhteellinen kosteus (%)</h2>
             {{ divs['rh'] }}
