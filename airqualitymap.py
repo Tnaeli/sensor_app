@@ -27,6 +27,7 @@ def read_ilmanetcsv():
     data.index = pd.to_datetime(data.index, format="%d.%m.%Y %H:%M")
     data = data.apply(pd.to_numeric, errors='coerce')
     data = data.rename(columns=str.lower).rename(columns={'pm2_5': 'pm25'})
+    data.sort_index(inplace=True)
     return data
 
 def airQualityTable(data, source='beacon'):
