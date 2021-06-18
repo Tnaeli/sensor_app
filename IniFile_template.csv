@@ -5,6 +5,7 @@ report_online	C:\path\to\sensor_report.html
 report_offline	C:\path\to\sensor_report_intended_for_offline.html
 mapSavepath	C:\path\to\sensorikartta.html
 stations	C:\path\to\csv_with_station_metadata.csv
+station_data	www.path.to/csv
 host	database_host
 database	database_name
 user	database_user_name

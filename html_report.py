@@ -113,7 +113,7 @@ def createTable(df):
     return df_style
 
 
-def read_ilmanetcsv():
+def read_ilmanetcsv(data_path):
     def customDateTime(datestr):
         if '24:00' in datestr:
             datestr = datestr.replace('24:00', '00:00')
@@ -121,7 +121,7 @@ def read_ilmanetcsv():
         else:
             return pd.to_datetime(datestr, format="%d.%m.%Y %H:%M")
         
-    data = pd.read_csv('http://ilmanlaatu.hsy.fi/data/ilmanet.csv', header=[0,1,2], parse_dates=True)
+    data = pd.read_csv(data_path, header=[0,1,2], parse_dates=True)
     data = data.drop(columns=data.filter(like='22').columns)
     data.columns = data.columns.droplevel(1)
     data.iloc[:,0] = data.iloc[:,0].apply(customDateTime)
@@ -131,8 +131,8 @@ def read_ilmanetcsv():
     data = data.rename(columns=str.lower).rename(columns={'pm2_5': 'pm25'})
     return data
 
-def parse_station_data():
-    data = read_ilmanetcsv()
+def parse_station_data(data_path_stations):
+    data = read_ilmanetcsv(data_path_stations)
     
     data.columns = ['_'.join(col) for col in data.columns.values]
     data[data==-9999] = np.nan
@@ -160,10 +160,10 @@ def loadTemplate(path, template):
 
     
 
-def createReport(data_Aqt, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html'):
+def createReport(data_Aqt, data_path_stations, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html'):
     components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25', 'rh', 'temp']
     
-    station_data = parse_station_data()
+    station_data = parse_station_data(data_path_stations)
     pm10_div = create_station_graph_div(station_data, 'pm10')
     
     

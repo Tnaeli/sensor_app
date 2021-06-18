@@ -11,7 +11,7 @@ import folium
 from folium import Marker
 from folium.features import DivIcon
 
-def read_ilmanetcsv():
+def read_ilmanetcsv(data_path):
     def customDateTime(datestr):
         if '24:00' in datestr:
             datestr = datestr.replace('24:00', '00:00')
@@ -19,7 +19,7 @@ def read_ilmanetcsv():
         else:
             return pd.to_datetime(datestr, format="%d.%m.%Y %H:%M")
         
-    data = pd.read_csv('http://ilmanlaatu.hsy.fi/data/ilmanet.csv', header=[0,1,2], parse_dates=True)
+    data = pd.read_csv(data_path, header=[0,1,2], parse_dates=True)
     data = data.drop(columns=data.filter(like='22').columns)
     data.columns = data.columns.droplevel(1)
     data.iloc[:,0] = data.iloc[:,0].apply(customDateTime)
@@ -284,8 +284,8 @@ def sensorsToMap(session, data, m, legend='Sensors'):
     return m
 
 
-def stationsToMap(stationLocations, m, legend='Stations'):
-    data = read_ilmanetcsv()
+def stationsToMap(stationLocations, m,data_path_stations, legend='Stations'):
+    data = read_ilmanetcsv(data_path_stations)
     stationMarkers = folium.FeatureGroup(legend)
     for idx, row in stationLocations.iterrows():
         dfRef = data[str(row['Siteno'])].iloc[-8:, :]
