@@ -10,6 +10,7 @@ import folium
 import dbqueries
 import airqualitymap
 import html_report
+import os
 
 
 def query_data_for_report(session, days, legend):
@@ -55,7 +56,7 @@ def generate_map(session, data_all, data_path_stations, hours, ini, m):
 def Main():
     # Create connector for database based on ini-file
     # -------------------------------------------------------------------------
-    ini_file = r"C:\Koodit\sensor_app\IniFile.csv"
+    ini_file = os.path.join(os.path.dirname(__file__), 'iniFile.csv')
     ini = pd.read_csv(ini_file, sep= '\t', index_col=0)
     session = dbqueries.createSession(ini)
     
