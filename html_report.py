@@ -238,10 +238,10 @@ def create_colocation_report(data_Aqt, savePath, template_folder, template_name,
     divs = {}
     divs_scatter = {}
     for component, fig in figs.items():
-        divs[component] = plotly.offline.plot(fig, show_link=False, output_type='div')      
+        divs[component] = plotly.offline.plot(fig, show_link=False, include_plotlyjs=False, output_type='div')      
 
     for component, fig in figs_scatter.items():
-        divs_scatter[component] = plotly.offline.plot(fig, show_link=False, output_type='div')     
+        divs_scatter[component] = plotly.offline.plot(fig, show_link=False, include_plotlyjs=False, output_type='div')     
         
     aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
     template = loadTemplate(template_folder, template_name)

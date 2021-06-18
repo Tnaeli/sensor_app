@@ -54,7 +54,7 @@ def generate_map(session, data_all, hours, ini, m):
 def Main():
     # Create connector for database based on ini-file
     # -------------------------------------------------------------------------
-    ini_file = r"C:\Koodit\hsysensor\IniFile_HOPE.csv"
+    ini_file = r"C:\Koodit\sensor_app\IniFile_HOPE.csv"
     ini = pd.read_csv(ini_file, sep= '\t', index_col=0)
     session = dbqueries.createSession(ini)
     
@@ -82,7 +82,8 @@ def Main():
     
         # Generate HTML report and save to file
         # ---------------------------------------------------------------------
-        html_report.createReport(data_all, ini.loc["report_online"][0], 18, True, 'hopekartta.html')
+        # html_report.createReport(data_all, ini.loc["report_online"][0], 'HOPEsensors.html', 18, True, 'hopekartta.html')
+        html_report.createReport(data_all, ini.loc["report_online"][0], ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
         # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
         
         
