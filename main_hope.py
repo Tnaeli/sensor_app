@@ -33,7 +33,7 @@ def query_data_for_report(session, days):
         
     return data_all, dataframe_empty
 
-def generate_map(session, data_all, hours, ini, m):
+def generate_map(session, data_all,data_path_stations, hours, ini, m):
     stationLocations = pd.read_csv(ini.loc['stations'][0], sep=';', header=0)
     stationLocations = stationLocations[stationLocations.Active == 1]
     
@@ -43,7 +43,7 @@ def generate_map(session, data_all, hours, ini, m):
     
     
     airqualitymap.sensorsToMap(session, table_data, m, 'HOPE')
-    airqualitymap.stationsToMap(stationLocations, m)
+    airqualitymap.stationsToMap(stationLocations, m, data_path_stations)
     airqualitymap.addEnfuserLayers(m)
     
     folium.LayerControl().add_to(m)
@@ -78,12 +78,13 @@ def Main():
         number_of_hours = 8
         m = folium.Map(location=[60.210731, 24.929990], tiles='cartodbpositron', zoom_start=11)
         
-        generate_map(session, data_all, number_of_hours, ini, m)
+        generate_map(session, data_all, ini.loc["station_data"][0], number_of_hours, ini, m)
     
         # Generate HTML report and save to file
         # ---------------------------------------------------------------------
         # html_report.createReport(data_all, ini.loc["report_online"][0], 'HOPEsensors.html', 18, True, 'hopekartta.html')
-        html_report.createReport(data_all, ini.loc["report_online"][0], ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
+        html_report.createReport(data_all, ini.loc["station_data"][0], ini.loc["report_online"][0], 
+                                 ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
         # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
         
         
