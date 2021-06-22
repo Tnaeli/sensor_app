@@ -201,12 +201,11 @@ def flagErrorData(data):
 
 def applyCorrection(sensors, data, components):
     df = data.copy()
-    for sensor_id in sensors.index.tolist():
-        for component in components:
-            slope = sensors.loc[sensor_id, component+'_slope']
-            intercept = sensors.loc[sensor_id, component+'_bias']
-            df.loc[df['sensor_id'] == sensor_id, component] = df.loc[df['sensor_id']
-                                                                     == sensor_id, component] * slope + intercept
+    row = sensors[sensors.id == df.loc[0, 'sensor_id']]
+    for component in components:
+        slope = sensors.loc[sensors.id == row.id.values[0], component+'_slope'].values[0]
+        intercept = sensors.loc[sensors.id == row.id.values[0], component+'_bias'].values[0]
+        df[component] = df[component] * slope + intercept
     return df
     
 

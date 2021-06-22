@@ -30,7 +30,7 @@ def query_data_for_report(session, days, legend):
         dataframe_empty = True
     else:
 
-        data_all = dbqueries.applyCorrection(sensors, data_all, components)
+        # data_all = dbqueries.applyCorrection(sensors, data_all, components)
         dataframe_empty = False
         
     return data_all, dataframe_empty
@@ -62,7 +62,7 @@ def Main():
     
     # Poll data from Vaisala API and insert to database
     # -------------------------------------------------------------------------
-    # dbqueries.updateDatabase(session)
+    dbqueries.updateDatabase(session)
     
     # Query data from database (data_all) for report and map
     # -------------------------------------------------------------------------
