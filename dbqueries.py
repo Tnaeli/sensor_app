@@ -160,7 +160,7 @@ def updateDatabase(session):
         if not data.empty:
             data.to_sql('Aqt_raw', session.bind, index=False, if_exists=('append'))
             
-            components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm10']
+            components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25']
             data = applyCorrection(sensors, data, components)
             data = flagErrorData(data)
             data.to_sql('Aqt', session.bind, index=False, if_exists=('append'))

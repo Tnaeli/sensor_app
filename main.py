@@ -21,19 +21,12 @@ def query_data_for_report(session, days, legend):
     date2 = pd.Timestamp(datetime.datetime.now())
     
     sensors = pd.read_sql_table('Sensor', con=session.bind).set_index('id')
-    components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25']
     
     sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('id')
     
     data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2, legend=legend)
-    if data_all.empty:
-        dataframe_empty = True
-    else:
-
-        # data_all = dbqueries.applyCorrection(sensors, data_all, components)
-        dataframe_empty = False
         
-    return data_all, dataframe_empty
+    return data_all, data_all.empty
 
 def generate_map(session, data_all, data_path_stations, hours, ini, m):
     stationLocations = pd.read_csv(ini.loc['stations'][0], sep=';', header=0)
