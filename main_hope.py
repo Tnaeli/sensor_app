@@ -20,19 +20,12 @@ def query_data_for_report(session, days):
     date2 = pd.Timestamp(datetime.datetime.now())
     
     sensors = pd.read_sql_table('Sensor', con=session.bind).set_index('id')
-    components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25']
     
     sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('id')
     
     data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2)
-    if data_all.empty:
-        dataframe_empty = True
-    else:
-
-        data_all = dbqueries.applyCorrection(sensors, data_all, components)
-        dataframe_empty = False
         
-    return data_all, dataframe_empty
+    return data_all, data_all.empty
 
 def generate_map(session, data_all,data_path_stations, hours, ini, m):
     stationLocations = pd.read_csv(ini.loc['stations'][0], sep=';', header=0)
@@ -49,13 +42,14 @@ def generate_map(session, data_all,data_path_stations, hours, ini, m):
     
     folium.LayerControl().add_to(m)
     m.save(ini.loc["mapSavepath"][0])
+    return m
     
 
 
 def Main():
     # Create connector for database based on ini-file
     # -------------------------------------------------------------------------
-    ini_file = os.path.join(os.path.dirname(__file__), 'iniFile.csv')
+    ini_file = os.path.join(os.path.dirname(__file__), 'iniFile_HOPE.csv')
     ini = pd.read_csv(ini_file, sep= '\t', index_col=0)
     session = dbqueries.createSession(ini)
     
@@ -85,8 +79,9 @@ def Main():
         # ---------------------------------------------------------------------
         # html_report.createReport(data_all, ini.loc["report_online"][0], 'HOPEsensors.html', 18, True, 'hopekartta.html')
         html_report.createReport(data_all, ini.loc["station_data"][0], ini.loc["report_online"][0], 
-                                 ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
+                                  ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
         # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
+        return m
         
         
 Main()

@@ -86,3 +86,27 @@ def Main():
         
         
 Main()
+
+# ini_file = os.path.join(os.path.dirname(__file__), 'iniFile.csv')
+# ini = pd.read_csv(ini_file, sep= '\t', index_col=0)
+# session = dbqueries.createSession(ini)
+
+# sensors = pd.read_sql_table('Sensor',  con=session.bind)
+# data_raw = pd.read_sql_table('Aqt_raw',  con=session.bind)
+
+# df = data_raw.copy()
+# components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25']
+
+# for row in sensors.itertuples():
+#     for component in components:
+#         slope = sensors.loc[sensors.id == row.id, component+'_slope'].values[0]
+#         intercept = sensors.loc[sensors.id == row.id, component+'_bias'].values[0]
+
+#         df.loc[df['sensor_id'] == row.id, component] = df.loc[df['sensor_id']== row.id, component] * slope + intercept
+        
+        
+# df[['pm10', 'sensor_id']].tail()
+
+# df_test = dbqueries.flagErrorData(df)
+
+# df_test.to_sql('Aqt', session.bind, index=False, if_exists=('append'))
