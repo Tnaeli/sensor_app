@@ -13,7 +13,7 @@ import jinja2
 
 
 
-def plotlyplot_line(df1):
+def plotlyplot_line(df1, legend_layout='bottom'):
     color_map = ['#379f9b', '#f18931', '#006431', '#bd3429',
                  '#814494', '#d82e8a', '#74aa50', '#006aa7']
     x1 = df1.index[0]
@@ -23,16 +23,20 @@ def plotlyplot_line(df1):
 
     fig = px.line(df1, x=df1.index, y="value", color="variable", width=1000, height=700,
                   range_x=[x1, x2], template='ggplot2', color_discrete_sequence=color_map)
-
-    fig.update_layout(legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=-0.3,
-        xanchor="right",
-        x=0.95
-    ))
+    
+    if legend_layout == 'bottom':
+        fig.update_layout(legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="right",
+            x=0.95
+        ))
+    if legend_layout == 'rightside':
+        pass
     
     fig.update_traces(patch={"line": {'width':4, 'color': 'grey'}}, selector={'legendgroup': 'Makelankatu'})
+    fig.update_traces(patch={"line": {'width':4, 'color': 'grey'}}, selector={'legendgroup': 'Refenrenssi'})
     return fig
 
 def plotlyplot_bar(df1):
@@ -160,7 +164,7 @@ def loadTemplate(path, template):
 
     
 
-def createReport(data_Aqt, data_path_stations, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html'):
+def createReport(data_Aqt, data_path_stations, savePath, template_folder, template_name, station_id=None, online=True, kartta='sensorikartta.html', legend_layout='bottom'):
     components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25', 'rh', 'temp']
     
     station_data = parse_station_data(data_path_stations)
@@ -169,9 +173,9 @@ def createReport(data_Aqt, data_path_stations, savePath, template_folder, templa
     
     data_dict = {}
     for component in components:
-        data = data_Aqt[[component, 'sensor_id']]
+        data = data_Aqt[[component, 'loc_id']]
         data = pd.pivot_table(data, values=component,
-                              index=data.index, columns='sensor_id')
+                              index=data.index, columns='loc_id')
         if online:
             data = data.resample('H', label='right').mean().round(1)
         if station_id != None:
@@ -186,7 +190,7 @@ def createReport(data_Aqt, data_path_stations, savePath, template_folder, templa
     figs_D = {}
 
     for component, data in data_dict.items():
-        figs[component] = plotlyplot_line(data)
+        figs[component] = plotlyplot_line(data, legend_layout=legend_layout)
         figs_D[component] = plotlyplot_bar(data.resample('D', label='left').mean())  
         
     
@@ -251,3 +255,112 @@ def create_colocation_report(data_Aqt, data_path_stations, savePath, template_fo
         
     with open(savePath, 'w', encoding='utf-8') as report:
         report.write(outputText)
+        
+        
+def create_HOPE_report(data_Aqt, data_path_stations, savePath, template_folder, template_name, station_id=None, online=True, kartta='hopekartta.html', legend_layout='bottom'):
+    components = ['no2', 'no', 'co', 'o3', 'pm10', 'pm25', 'rh', 'temp']
+    
+    station_data = parse_station_data(data_path_stations)
+    pm10_div = create_station_graph_div(station_data, 'pm10')
+    
+    regions = {"Makelankatu":'Vallila',
+                "Marian sairaala":'Jatkasaari1',
+                "Lansisatamankatu 34":'Jatkasaari2',
+                "Selkamerenkatu 3":'Jatkasaari2',
+                "Valimerenkatu 5":'Jatkasaari2',
+                "Tyynenmerenkatu 3":'Jatkasaari2',
+                "Lansisatamankatu apt":'Jatkasaari2',
+                "Hyvantoivonkatu 7":'Jatkasaari1',
+                "Atlankatinkatu 5":'Jatkasaari1',
+                "Atlantinkatu 18":'Jatkasaari1',
+                "Tyynenmerenkatu 14":'Jatkasaari2',
+                "Hernesaari":'Jatkasaari1',
+                "Teollisuuskatu 23":'Vallila',
+                "Teollisuuskatu 3":'Vallila',
+                "Sturenkatu 22":'Vallila',
+                "Hameentie 95":'Vallila',
+                "Smear III":'Vallila',
+                "Hameentie 115":'Vallila',
+                "Pirjontie 43":'Pakila1',
+                "Pakilantie 55":'Pakila1',
+                "Kylakunnantie 19":'Pakila1',
+                "Palosuontie 2":'Pakila2',
+                "Elonkuja 3":'Pakila2',
+                "Kansantie 37":'Pakila1',
+                "Elontie 111":'Pakila2',
+                "Sysimiehentie 44":'Pakila2'}
+    
+    def plotlyplot_line_hope(df1, regions):
+        color_map = ['#379f9b', '#f18931', '#006431', '#bd3429',
+                     '#814494', '#d82e8a', '#74aa50', '#006aa7']
+        x1 = df1.index[0]
+        x2 = df1.index[-1] + datetime.timedelta(hours=3)
+        df1 = df1.melt(ignore_index=False, var_name='variable', value_name='value')
+        df1['region'] = df1['variable']
+        df1['region'] = df1['region'].replace(regions)
+        
+        y1=df1['value'].min() - 3
+        y2=df1['value'].max() + df1['value'].max() * 0.1
+    
+        fig = px.line(df1, x=df1.index, y="value", color="variable", facet_row='region', width=1000, height=2100,
+                      range_x=[x1, x2],range_y=[y1,y2], template='ggplot2', color_discrete_sequence=color_map)
+        
+        fig.update_traces(patch={"line": {'width':4, 'color': 'grey'}}, selector={'legendgroup': 'Makelankatu'})
+        fig.update_traces(patch={"line": {'width':4, 'color': 'grey'}}, selector={'legendgroup': 'Refenrenssi'})
+        return fig
+    
+    station_data = parse_station_data(data_path_stations)
+    
+    data_dict = {}
+    for component in components:
+        data = data_Aqt[[component, 'loc_id']]
+        data = pd.pivot_table(data, values=component,
+                              index=data.index, columns='loc_id')
+        data = data.resample('H', label='right').mean().round(1)
+        if station_id != None:
+            if component in ['no', 'no2', 'pm10', 'pm25', 'o3']:
+                refData = station_data.filter(like=f'{station_id}_')
+                data = pd.concat([data, refData.loc[:, f'{station_id}_{component}'].rename('Makelankatu')],axis=1)
+        data_dict[component] = data
+    
+    figs = {}
+    figs_D = {}
+
+    for component, data in data_dict.items():
+        figs[component] = plotlyplot_line_hope(data, regions)
+        figs_D[component] = plotlyplot_bar(data.resample('D', label='left').mean())  
+        
+    
+    divs = {}
+    divs_D = {}
+    for component, fig in figs.items():
+        divs[component] = plotly.offline.plot(fig, show_link=False, output_type='div')
+        
+    for component, fig in figs_D.items():
+        divs_D[component] = plotly.offline.plot(fig, show_link=False, output_type='div')
+    
+
+                 
+
+    aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
+    template = loadTemplate(template_folder, template_name)
+    outputText = template.render(aika=aika, divs = divs, divs_D = divs_D, pm10_div=pm10_div, kartta=kartta)
+
+        
+    with open(savePath, 'w', encoding='utf-8') as report:
+        report.write(outputText)
+        
+
+
+
+
+
+
+# regions = {'Pirjontie43':'Pakila1', 'Elontie111':'Pakila1', 'Kylakunnantie19':'Pakila1', 'sysimiehentie44':'Pakila1',
+#            'kansantie37':'Pakila2', 'palosuontie2':'Pakila2', 'pakilantie55':'Pakila2', 'elonkuja3':'Pakila2',
+#            'hameentie95':'Vallila', 'hameentie115':'Vallila', 'sturenkatu22':'Vallila', 
+#            'teollisuuskatu23':'Vallila', 'kumpulasmear':'Vallila', 'teollisuuskatu3':'Vallila',
+#            'hyvantoivonkatu7':'Jatkasaari1', 'hernesaari':'Jatkasaari1' ,'mariansairaala':'Jatkasaari1', 'atlantinkatu14':'Jatkasaari1', 
+#             'atlantinkatu5':'Jatkasaari1', 'lansisatamankatu4th':'Jatkasaari1',
+#             'tyynenmerenkatu14':'Jatkasaari2', 'tyynenmerenkatu3':'Jatkasaari2', 'selkamerenkatu3':'Jatkasaari2',
+#             'valimerenkatu5':'Jatkasaari2', 'lansisatamankatu':'Jatkasaari2'}

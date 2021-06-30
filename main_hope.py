@@ -60,27 +60,31 @@ def Main():
     # Query data from database (data_all) for report and map
     # -------------------------------------------------------------------------
     
-    days = 4 # Number of days from current time for report
+    days = 2 # Number of days from current time for report
     data_all, dataframe_empty = query_data_for_report(session, days)
     if dataframe_empty:
         print('No data found between given date range')
     else:
-        data_all = data_all[data_all.sensor_id != 'Supersite']
+        data_colocation = data_all[data_all.sensor_id.isin(['AQT02', 'AQT03', 'AQT04', 'AQT30', 'AQT31'])].copy()
+        data_all = data_all[data_all.loc_id != 'Supersite']
         
         
         # Generate map and save to file
         # ---------------------------------------------------------------------
-        number_of_hours = 8
+        number_of_hours = 10
         m = folium.Map(location=[60.210731, 24.929990], tiles='cartodbpositron', zoom_start=11)
         
         generate_map(session, data_all, ini.loc["station_data"][0], number_of_hours, ini, m)
     
         # Generate HTML report and save to file
         # ---------------------------------------------------------------------
-        # html_report.createReport(data_all, ini.loc["report_online"][0], 'HOPEsensors.html', 18, True, 'hopekartta.html')
-        html_report.createReport(data_all, ini.loc["station_data"][0], ini.loc["report_online"][0], 
-                                  ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True, 'hopekartta.html')
-        # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
+        html_report.create_HOPE_report(data_all, ini.loc["station_data"][0], ini.loc["report_online"][0], 
+                                  ini.loc["template_folder"][0], ini.loc["report_template"][0],
+                                  station_id=18, online=True, kartta='hopekartta.html', legend_layout='rightside')
+        
+        html_report.create_colocation_report(data_colocation, ini.loc["station_data"][0], ini.loc["report_colocation"][0], 
+                                              ini.loc["template_folder"][0], ini.loc["colocation_template"][0], 18)
+        
         return m
         
         

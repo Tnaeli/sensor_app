@@ -13,7 +13,7 @@ import html_report
 import os
 
 
-def query_data_for_report(session, days, legend):
+def query_data_for_report(session, days):
     date1 = (pd.Timestamp(datetime.datetime.now() - 
                           datetime.timedelta(days=days, 
                             hours=datetime.datetime.now().hour,
@@ -24,7 +24,7 @@ def query_data_for_report(session, days, legend):
     
     sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('id')
     
-    data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2, legend=legend)
+    data_all = dbqueries.queryBetweenDates(session, sensors, sensorLocations, date1, date2)
         
     return data_all, data_all.empty
 
@@ -61,17 +61,17 @@ def Main():
     # -------------------------------------------------------------------------
     
     days = 4 # Number of days from current time for report
-    data_all, dataframe_empty = query_data_for_report(session, days, 'sensor')
+    data_all, dataframe_empty = query_data_for_report(session, days)
     if dataframe_empty:
         print('No data found between given date range')
     else:
         data_colocation = data_all[data_all.sensor_id.isin(['HSYS001', 'HSYS002', 'HSYS004'])].copy()
-        data_all = data_all[data_all.sensor_id != 'Supersite']
+        data_all = data_all[data_all.loc_id != 'Supersite']
 
         
         # Generate map and save to file
         # ---------------------------------------------------------------------
-        number_of_hours = 8
+        number_of_hours = 12
         m = folium.Map(location=[60.210731, 24.929990], tiles='cartodbpositron', zoom_start=11)
         
         generate_map(session, data_all, ini.loc["station_data"][0], number_of_hours, ini, m)

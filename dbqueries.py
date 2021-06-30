@@ -210,7 +210,7 @@ def applyCorrection(sensors, data, components):
     
 
 
-def queryBetweenDates(session, sensors, locations, date1, date2, legend='location'):
+def queryBetweenDates(session, sensors, locations, date1, date2):
 
     data = pd.read_sql(session.query(Aqt).filter(
         Aqt.timestamp.between(date1, date2)
