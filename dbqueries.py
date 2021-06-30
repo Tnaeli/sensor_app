@@ -222,14 +222,14 @@ def queryBetweenDates(session, sensors, locations, date1, date2, legend='locatio
     for  idx, row in sensors.iterrows():
         sensors.loc[idx, 'loc_id'] = locations.loc[row['loc_id'], 'name']
 
-    if legend == 'location':
-        legends = dict(zip(sensors.index.tolist(), sensors.loc_id.tolist()))
-        data['sensor_id'] = data['sensor_id'].replace(legends)
-    if legend == 'sensor':
-        legends = dict(zip(sensors.index.tolist(), sensors.name.tolist()))
-        legends_loc = dict(zip(locations.index.tolist(), locations.name.tolist()))
-        data['sensor_id'] = data['sensor_id'].replace(legends)
-        data['loc_id'] = data['loc_id'].replace(legends_loc)
+    # if legend == 'location':
+    #     legends = dict(zip(sensors.index.tolist(), sensors.loc_id.tolist()))
+    #     data['sensor_id'] = data['sensor_id'].replace(legends)
+    # if legend == 'sensor':
+    legends = dict(zip(sensors.index.tolist(), sensors.name.tolist()))
+    legends_loc = dict(zip(locations.index.tolist(), locations.name.tolist()))
+    data['sensor_id'] = data['sensor_id'].replace(legends)
+    data['loc_id'] = data['loc_id'].replace(legends_loc)
 
     data.index = data['timestamp']
     data = data.drop(columns='timestamp')

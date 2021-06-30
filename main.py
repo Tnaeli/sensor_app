@@ -55,20 +55,19 @@ def Main():
     
     # Poll data from Vaisala API and insert to database
     # -------------------------------------------------------------------------
-    dbqueries.updateDatabase(session)
+    # dbqueries.updateDatabase(session)
     
     # Query data from database (data_all) for report and map
     # -------------------------------------------------------------------------
     
     days = 4 # Number of days from current time for report
-    data_all, dataframe_empty = query_data_for_report(session, days, 'location')
+    data_all, dataframe_empty = query_data_for_report(session, days, 'sensor')
     if dataframe_empty:
         print('No data found between given date range')
     else:
-        # data_colocation = data_all[data_all.sensor_id.isin(['HSYS001', 'HSYS002', 'HSYS004'])].copy()
+        data_colocation = data_all[data_all.sensor_id.isin(['HSYS001', 'HSYS002', 'HSYS004'])].copy()
         data_all = data_all[data_all.sensor_id != 'Supersite']
 
-        
         
         # Generate map and save to file
         # ---------------------------------------------------------------------
@@ -79,10 +78,13 @@ def Main():
     
         # Generate HTML report and save to file
         # ---------------------------------------------------------------------
+        
         html_report.createReport(data_all, ini.loc["station_data"][0], ini.loc["report_online"][0], 
-                                 ini.loc["report_template_folder"][0], ini.loc["report_template"][0], 18, True)
-        # html_report.createReport(data_all, ini.loc["report_offline"][0], None, False)
-        # html_report.create_colocation_report(data_colocation, r"C:\Users\Taneli\Documents\sensor_app\colocrap.html", ini.loc["report_template_folder"][0], 'template_colocation_report.html', 18)
+                                  ini.loc["template_folder"][0], ini.loc["report_template"][0], 18, True)
+        
+        
+        html_report.create_colocation_report(data_colocation, ini.loc["station_data"][0], ini.loc["report_colocation"][0], 
+                                              ini.loc["template_folder"][0], ini.loc["colocation_template"][0], 18)
         
         
 Main()

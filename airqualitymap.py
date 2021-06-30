@@ -259,26 +259,21 @@ def airQualityMarker(lat, lon, markerText, markerColor, tooltip, table, sensor=T
                             popup='<h3>' + tooltip + '</h3>'+table.render())
 
         return marker
-    
-        # marker = Marker([lat, lon], tooltip=tooltip, icon=icon,
-        #                 popup='<h3>' + tooltip + '</h3>'+table.render())
-
-        # return marker
 
 
 def sensorsToMap(session, data, m, legend='Sensors'):
-    sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('id')
+    sensorLocations = pd.read_sql_table('Location', con=session.bind).set_index('name')
     sensorMarkers = folium.FeatureGroup(legend)
     
     for loc_id in data['loc_id'].value_counts().index:
-        if loc_id == 0:
+        if loc_id == 'Supersite':
             pass
         else:
             data_id1 = data[data['loc_id'] == loc_id]
             table, markerColor, markerText = airQualityTable(data_id1, source='beacon')
             
             marker = airQualityMarker(sensorLocations.loc[loc_id, 'lat'], sensorLocations.loc[loc_id, 'lon'], 
-                                      markerText.upper(), markerColor, 'Sensori: ' + sensorLocations.loc[loc_id, 'name'], table, sensor=True)
+                                      markerText.upper(), markerColor, f'Sensori: {loc_id}', table, sensor=True)
             marker.add_to(sensorMarkers)
     sensorMarkers.add_to(m)
     return m

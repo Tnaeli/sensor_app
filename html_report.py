@@ -66,7 +66,7 @@ def plotlyplot_scatter(df1, x):
     df1 = df1.melt(ignore_index=False, var_name='variable', value_name='value', id_vars=[x])
 
     fig = px.scatter(df1, x=x, y='value', facet_col='variable', color_discrete_sequence=color_map,
-                    width=1000, height=350)
+                    trendline ='ols', width=1000, height=350)
 
     fig.update_layout(legend=dict(
         orientation="h",
@@ -210,10 +210,10 @@ def createReport(data_Aqt, data_path_stations, savePath, template_folder, templa
         report.write(outputText)
 
 
-def create_colocation_report(data_Aqt, savePath, template_folder, template_name, station_id=None, kartta='sensorikartta.html'):
-    components = ['no2', 'no', 'o3', 'pm10', 'pm25']
+def create_colocation_report(data_Aqt, data_path_stations, savePath, template_folder, template_name, station_id=None):
+    components = ['no2', 'no', 'o3', 'co', 'pm10', 'pm25', 'rh', 'temp']
     
-    station_data = parse_station_data()
+    station_data = parse_station_data(data_path_stations)
     
     data_dict = {}
     for component in components:
@@ -224,7 +224,7 @@ def create_colocation_report(data_Aqt, savePath, template_folder, template_name,
         if station_id != None:
             if component in ['no', 'no2', 'pm10', 'pm25', 'o3']:
                 refData = station_data.filter(like=f'{station_id}_')
-                data = pd.concat([data, refData.loc[:, f'{station_id}_{component}'].rename('Makelankatu')],axis=1)
+                data = pd.concat([data, refData.loc[:, f'{station_id}_{component}'].rename('Referenssi')],axis=1)
         data_dict[component] = data
     
     figs = {}
@@ -233,7 +233,8 @@ def create_colocation_report(data_Aqt, savePath, template_folder, template_name,
         figs[component] = plotlyplot_line(data)
 
     for component, data in data_dict.items():
-        figs_scatter[component] = plotlyplot_scatter(data, 'Makelankatu')
+        if component in ['no', 'no2', 'pm10', 'pm25', 'o3']:
+            figs_scatter[component] = plotlyplot_scatter(data, 'Referenssi')
         
     divs = {}
     divs_scatter = {}
@@ -245,7 +246,7 @@ def create_colocation_report(data_Aqt, savePath, template_folder, template_name,
         
     aika = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
     template = loadTemplate(template_folder, template_name)
-    outputText = template.render(aika=aika, divs = divs, divs_scatter = divs_scatter, kartta=kartta)
+    outputText = template.render(aika=aika, divs = divs, divs_scatter = divs_scatter)
 
         
     with open(savePath, 'w', encoding='utf-8') as report:
