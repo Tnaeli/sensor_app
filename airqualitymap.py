@@ -186,11 +186,13 @@ def airQualityTable(data, source='beacon'):
         data = data[columns]
         data = addIndex(data)
         
-        markerColor = markerColor(data)
-        markerText = data.filter(like='_index').idxmax(axis=1)[-1].split('_')[0]
-        
-        data = data[['pm10', 'no2', 'co', 'pm25',
-                     'o3', 'no', 'temp', 'rh', 'aqindex']]
+        if not data.empty:
+            markerColor = markerColor(data)
+            markerText = data.filter(like='_index').idxmax(axis=1)[-1].split('_')[0]
+        else:
+            markerColor = 'black'
+            markerText = 'NA'
+            
         data.index.name = 'timestamp(date&time)'
 
         df_style = data.style.set_table_styles(
