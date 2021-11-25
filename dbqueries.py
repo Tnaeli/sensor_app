@@ -89,10 +89,14 @@ class AQTParser(object):
                     'PM2.5': 'pm25', 'Wind Dir.': 'wd', 'Wind Speed': 'ws', 'Rain': 'rain'})
 
         data = data.apply(pd.to_numeric, errors = 'coerce')
-        data['co'] = data['co'] * 1160
-        data['no'] = data['no'] * 1247
-        data['no2'] = data['no2'] * 1912
-        data['o3'] = data['o3'] * 1996
+        if 'co' in df.columns:
+            data['co'] = data['co'] * 1160
+        if 'no' in df.columns:
+            data['no'] = data['no'] * 1247
+        if 'no2' in df.columns:
+            data['no2'] = data['no2'] * 1912
+        if 'o3' in df.columns:
+            data['o3'] = data['o3'] * 1996
         data = data.round(2)
                 
         data.index = pd.to_datetime(data.index, yearfirst = True).round('T')
