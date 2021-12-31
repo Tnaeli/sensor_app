@@ -108,9 +108,14 @@ def airQualityTable(data, source='beacon'):
 
         return index
 
-    def addIndex(df):
+    def addIndex(df, source):
+        if source == 'beacon':
+            index_columns = ['no2', 'co', 'pm10', 'pm25']
+        elif source == 'fmi_api':
+            index_columns = ['no2', 'co', 'pm10', 'pm25', 'o3']
+
         for columnName in df.columns:
-            if columnName in ['no2', 'co', 'pm10', 'pm25', 'o3']:
+            if columnName in index_columns:
                 name = columnName + '_index'
                 df[name] = df[columnName].apply(
                     calcIndex, args=(columnName,)).round(1)
@@ -184,7 +189,7 @@ def airQualityTable(data, source='beacon'):
 
         flagData = data[flags]
         data = data[columns]
-        data = addIndex(data)
+        data = addIndex(data, source)
         
         if not data.empty:
             markerColor = markerColor(data)
@@ -205,7 +210,7 @@ def airQualityTable(data, source='beacon'):
     
     elif source == 'fmi_api':
         columns = ['pm10', 'no2','pm25', 'o3']
-        data = addIndex(data.dropna(how='all', axis = 1).dropna(how='all'))
+        data = addIndex(data.dropna(how='all', axis = 1).dropna(how='all'), source)
         if 'aqindex' in data.columns:
             markerColor = markerColor(data)
             markerText = data.filter(like='_index').idxmax(axis=1)[-1].split('_')[0]
