@@ -124,10 +124,14 @@ def airQualityTable(data, source='beacon'):
         return df
 
     def cellBorderColor(s):
+        if source == 'beacon':
+            index_columns = ['no2', 'co', 'pm10', 'pm25']
+        elif source == 'fmi_api':
+            index_columns = ['no2', 'co', 'pm10', 'pm25', 'o3']
         component = s.name
         colors = []
         
-        if component not in ['no2', 'co', 'pm10', 'pm25', 'o3']:
+        if component not in index_columns:
             for value in s:
                 colors.append('border-color: white')
             return colors
