@@ -5,6 +5,7 @@ Created on Tue May  4 14:14:14 2021
 @author: Taneli Mäkelä
 """
 import pandas as pd
+import numpy as np
 import datetime
 import requests
 import xml.etree.ElementTree as ET
@@ -43,7 +44,7 @@ class AQTParser(object):
         print(f'start: {times[0]}')
         
         try:
-            r = requests.get("http://api.envitems.com/?", params=payload)
+            r = requests.get("http://beacon.vaisala.com/api/?", params=payload)
             if r.status_code != 200:
                 print(datetime.datetime.now(), 'Error! Response status code:', r.status_code)
             times.append(datetime.datetime.now())
@@ -89,14 +90,10 @@ class AQTParser(object):
                     'PM2.5': 'pm25', 'Wind Dir.': 'wd', 'Wind Speed': 'ws', 'Rain': 'rain'})
 
         data = data.apply(pd.to_numeric, errors = 'coerce')
-        if 'co' in df.columns:
-            data['co'] = data['co'] * 1160
-        if 'no' in df.columns:
-            data['no'] = data['no'] * 1247
-        if 'no2' in df.columns:
-            data['no2'] = data['no2'] * 1912
-        if 'o3' in df.columns:
-            data['o3'] = data['o3'] * 1996
+        data['co'] = data['co'] * 1160
+        data['no'] = data['no'] * 1247
+        data['no2'] = data['no2'] * 1912
+        data['o3'] = data['o3'] * 1996
         data = data.round(2)
                 
         data.index = pd.to_datetime(data.index, yearfirst = True).round('T')
@@ -113,7 +110,8 @@ class AQTParser(object):
     #Inserting data to database after parsing, editing data and flagging. Returns True if no data was parsed
     def fetchAndEdit(self, starttime):
         
-        starttime = (starttime + datetime.timedelta(seconds=30)).tz_localize(tz='Europe/Helsinki')
+        # TODO: Syksyllä kellonjen siirto kaataa scriptin, koska koodi ei tiedä onko starttime kello 2-3 välillä kesäaikaa vai talviaikaa koska kellonaikoja on kahdet.
+        starttime = (starttime + datetime.timedelta(seconds=30)).tz_localize(tz='Europe/Helsinki', ambiguous=False, nonexistent='shift_forward')
         starttime = starttime.tz_convert('UTC')
         starttime = starttime.tz_localize(None)
         

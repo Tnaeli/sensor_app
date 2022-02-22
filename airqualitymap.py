@@ -31,7 +31,7 @@ def read_ilmanetcsv(data_path):
     return data
 
 def airQualityTable(data, source='beacon'):
-    columns = ['co', 'no', 'no2', 'o3', 'pm10', 'pm25', 'temp', 'rh']
+    columns = ['no2', 'pm10', 'pm25', 'co', 'no', 'o3', 'temp', 'rh']
     columns_flag = ['co', 'no', 'no2', 'o3', 'pm10', 'pm25', 'temp', 'rh',
                          'co_flag', 'no_flag', 'no2_flag', 'o3_flag', 'pm10_flag', 'pm25_flag']
     flags = ['co_flag', 'no2_flag',
@@ -122,6 +122,7 @@ def airQualityTable(data, source='beacon'):
         if not df.filter(like='_index', axis=1).empty:
             df['aqindex'] = df.filter(like='_index', axis=1).apply(max, axis=1)
         return df
+    
 
     def cellBorderColor(s):
         if source == 'beacon':
@@ -201,7 +202,10 @@ def airQualityTable(data, source='beacon'):
         else:
             markerColor = 'black'
             markerText = 'NA'
-            
+        
+        # data = data[['pm10', 'no2', 'co', 'pm25', 'o3', 'no', 'temp', 'rh', 'aqindex']]
+        
+        data = data[data.columns[data.columns.isin(['pm10', 'no2', 'co', 'pm25', 'o3', 'no', 'temp', 'rh', 'aqindex'])]]
         data.index.name = 'timestamp(date&time)'
 
         df_style = data.style.set_table_styles(
